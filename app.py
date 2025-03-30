@@ -15,26 +15,28 @@ def generate_script(user_idea):
     context = gather_context(user_idea)
 
     prompt = f"""
-You're a social media content scriptwriter for creators.
+You are a niche content strategist for advanced creators on platforms like Instagram and X (Twitter).
 
 The creator wants to make content about: "{user_idea}"
+
 Here's real-world context from Reddit, Brave Search, and Wikipedia:
 
 {context}
 
-Based on this, generate the following:
+Now, create two platform-specific scripts — but keep the following in mind:
 
-1. A **1-minute Instagram Reel script** with:
-   - A short hook/opening
-   - Clear and concise content script
-   - A brief closing call-to-action
-   - No second-by-second breakdown, just one block of text
+🎯 Focus on the *most technically interesting* or *controversial* angle.
+💥 Include insights, contradictions, or lesser-known facts. Avoid surface-level summaries.
+⚙️ Use precise, domain-specific language where appropriate (especially for tech/science topics).
+⛔ Do NOT add generic statements like “this is making waves” or “netizens are divided.”
 
-2. A **short X (Twitter) thread** (max 3 tweets):
-   - Clear, insightful, opinion-based or informational
-   - Avoid fluff — be direct and helpful
+Generate:
 
-Be crisp. Emphasize the content of the topic. Avoid repeating the same idea across formats. Write as if it's ready to be filmed.
+1. A **1-minute Instagram Reel script** — attention-grabbing, opinionated, and tight. No fluff. Write as a single content block with a bold start and a clear conclusion.
+
+2. A **short Twitter (X) thread (max 3 posts)** — sharp, technical, and thought-provoking. Don’t repeat Reel content. Use it to offer a different angle or counterpoint.
+
+Write for creators who are building a niche by showing original thinking, not chasing trends.
 """
 
     print("🔁 Sending to Groq with prompt:")
