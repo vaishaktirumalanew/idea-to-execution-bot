@@ -11,25 +11,25 @@ app = Flask(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Generate script using Groq + gathered context
+# Generate platform-specific content using Groq
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
     prompt = f"""
-You are a content creation assistant for Instagram/TikTok creators.
+You're a social media strategist and script writer for content creators.
 
 The creator wants to make content about: "{user_idea}"
-Here’s some background context from Reddit, Brave Search, and Wikipedia:
+Here’s real-world context (Reddit, Brave Search, Wikipedia):
 
 {context}
 
 Based on this, generate:
-1. A hook (1 line)
-2. A 1-minute video script
-3. Suggested format (e.g., reel, tweet thread, carousel)
-4. Optional CTA or caption idea
 
-Keep it WhatsApp-friendly and beginner-friendly.
+1. A 1-minute **Instagram Reel script** — punchy, fast-paced, visual focus
+2. A compelling **X (Twitter) post or short thread** — punchy, informative or opinion-based
+3. A 1-minute **YouTube Short script** — more structured, story or fact-style, with a strong hook and call to action
+
+Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner creator friendly.
 """
 
     try:
@@ -53,6 +53,7 @@ Keep it WhatsApp-friendly and beginner-friendly.
         print("❌ Error from Groq:", str(e), flush=True)
         return "⚠️ Couldn't generate content. Please try again."
 
+
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.form.get("Body")
@@ -64,6 +65,6 @@ def whatsapp():
     resp.message(reply)
     return Response(str(resp), mimetype="application/xml")
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
