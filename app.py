@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
@@ -80,12 +81,12 @@ def whatsapp():
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # Clean formatting for WhatsApp
+    # Sanitize markdown and special characters
     reply = reply.replace("**", "").replace("*", "")
     reply = reply.replace("```", "").replace("__", "")
     reply = reply.encode("ascii", "ignore").decode()
 
-    # Split reply into sections
+    # Extract sections
     sections = reply.split("### ")
     insta, x_post = "", ""
     for section in sections:
@@ -94,11 +95,19 @@ def whatsapp():
         elif "Twitter" in section or "X" in section:
             x_post = section.strip()
 
+    # Trim if too long
+    max_len = 1500
+    if len(insta) > max_len:
+        insta = insta[:max_len] + "\n\n[Trimmed for WhatsApp]"
+    if len(x_post) > max_len:
+        x_post = x_post[:max_len] + "\n\n[Trimmed for WhatsApp]"
+
+    # Send messages
     resp = MessagingResponse()
     if insta:
-        resp.message("📸 *Instagram Reel Script:*\n\n" + insta[:1500])
+        resp.message("📸 *Instagram Reel Script:*\n\n" + insta)
     if x_post:
-        resp.message("🐦 *X / Twitter Thread:*\n\n" + x_post[:1500])
+        resp.message("🐦 *X / Twitter Thread:*\n\n" + x_post)
 
     print("📤 Reply sections sent.")
     return Response(str(resp), mimetype="application/xml")
