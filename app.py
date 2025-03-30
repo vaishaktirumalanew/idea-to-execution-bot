@@ -15,20 +15,32 @@ def generate_script(user_idea):
     context = gather_context(user_idea)
 
     prompt = f"""
-You're a social media strategist and script writer for content creators.
+You're a social media content scriptwriter for creators.
 
 The creator wants to make content about: "{user_idea}"
-Here’s real-world context (Reddit, Brave Search, Wikipedia):
+Here's real-world context from Reddit, Brave Search, and Wikipedia:
 
 {context}
 
-Based on this, generate:
+Based on this, generate the following:
 
-1. A 1-minute **Instagram Reel script** — punchy, fast-paced, visual focus  
-2. A compelling **X (Twitter) post or short thread** — punchy, informative or opinion-based  
-3. A 1-minute **YouTube Short script** — structured, story or fact-style, strong hook and CTA  
+1. A **1-minute Instagram Reel script** with:
+   - A short hook/opening
+   - Clear and concise content script
+   - A brief closing call-to-action
+   - No second-by-second breakdown, just one block of text
 
-Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner-creator-friendly.
+2. A **short X (Twitter) thread** (max 3 tweets):
+   - Clear, insightful, opinion-based or informational
+   - Avoid fluff — be direct and helpful
+
+3. A **1-minute YouTube Short script** with:
+   - A quick attention-grabber
+   - The core message/story
+   - A soft ending with CTA or reflection
+   - Again, no timestamps — just write like you're scripting for a creator
+
+Be crisp. Emphasize the content of the topic. Avoid repeating the same idea across formats. Write as if it's ready to be filmed.
 """
 
     print("🔁 Sending to Groq with prompt:")
@@ -72,25 +84,31 @@ def whatsapp():
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # ✅ Sanitize the response for WhatsApp
-    reply = reply.replace("**", "")
-    reply = reply.replace("*", "")
-    reply = reply.replace("```", "")
-    reply = reply.replace("__", "")
-    reply = reply.encode("ascii", "ignore").decode()  # Remove emojis & special characters
+    # Clean up markdown and non-ASCII characters
+    reply = reply.replace("**", "").replace("*", "")
+    reply = reply.replace("```", "").replace("__", "")
+    reply = reply.encode("ascii", "ignore").decode()
 
-    # ✅ Trim line count
-    reply = "\n".join(reply.splitlines()[:20])
-
-    # ✅ Enforce Twilio message size limit
-    max_twilio_length = 1500
-    if len(reply) > max_twilio_length:
-        print(f"✂️ Reply too long ({len(reply)} chars), trimming")
-        reply = reply[:max_twilio_length] + "\n\n[Trimmed for WhatsApp]"
+    # Split reply into separate sections
+    sections = reply.split("### ")
+    insta, x_post, yt = "", "", ""
+    for section in sections:
+        if "Instagram" in section:
+            insta = section.strip()
+        elif "Twitter" in section or "X" in section:
+            x_post = section.strip()
+        elif "YouTube" in section:
+            yt = section.strip()
 
     resp = MessagingResponse()
-    resp.message(reply)
-    print("📤 Sending to WhatsApp:", reply[:300], "..." if len(reply) > 300 else "")
+    if insta:
+        resp.message("📸 *Instagram Reel Script:*\n\n" + insta[:1500])
+    if x_post:
+        resp.message("🐦 *X / Twitter Thread:*\n\n" + x_post[:1500])
+    if yt:
+        resp.message("📺 *YouTube Short Script:*\n\n" + yt[:1500])
+
+    print("📤 Reply sections sent.")
     return Response(str(resp), mimetype="application/xml")
 
 
