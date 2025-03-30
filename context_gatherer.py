@@ -71,7 +71,7 @@ def gather_context(topic):
     brave = fetch_brave_articles(topic)
     reddit = fetch_reddit_summary(topic)
 
-    return f\"\"\"📚 Wikipedia:
+    return f"""📚 Wikipedia:
 {wiki}
 
 📰 Brave Search:
@@ -79,4 +79,4 @@ def gather_context(topic):
 
 🔥 Reddit Posts:
 {reddit}
-\"\"\"
+"""
