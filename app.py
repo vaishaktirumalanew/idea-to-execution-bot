@@ -31,7 +31,9 @@ Based on this, generate:
 
 Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner creator friendly.
 """
-
+    print("🔁 Sending to Groq with prompt:")
+print(prompt)
+print("📬 Waiting for response...")
     try:
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
