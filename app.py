@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Function to generate content using Groq API
+
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
@@ -54,9 +54,8 @@ Make each one stand on its own. Don't repeat the same script for all 3. Make it 
         print("🧠 Raw response text:", response.text)
 
         data = response.json()
-
         reply_text = data["choices"][0]["message"]["content"]
-        print("📝 Final reply:", reply_text)
+        print("📝 Final reply:", reply_text[:300], "..." if len(reply_text) > 300 else "")
         return reply_text
 
     except Exception as e:
@@ -71,8 +70,17 @@ def whatsapp():
 
     reply = generate_script(incoming_msg)
 
+    if not reply or len(reply.strip()) == 0:
+        reply = "⚠️ I couldn’t generate a response right now. Try again in a few seconds."
+
+    max_twilio_length = 1600
+    if len(reply) > max_twilio_length:
+        print(f"✂️ Reply too long ({len(reply)} chars), trimming to {max_twilio_length}")
+        reply = reply[:max_twilio_length] + "\n\n[Trimmed for WhatsApp length limit]"
+
     resp = MessagingResponse()
     resp.message(reply)
+    print("📤 Sending reply to WhatsApp:", reply[:300], "..." if len(reply) > 300 else "")
     return Response(str(resp), mimetype="application/xml")
 
 
