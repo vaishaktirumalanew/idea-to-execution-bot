@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
@@ -25,11 +24,11 @@ Here’s real-world context (Reddit, Brave Search, Wikipedia):
 
 Based on this, generate:
 
-1. A 1-minute **Instagram Reel script** — punchy, fast-paced, visual focus
-2. A compelling **X (Twitter) post or short thread** — punchy, informative or opinion-based
-3. A 1-minute **YouTube Short script** — more structured, story or fact-style, with a strong hook and call to action
+1. A 1-minute **Instagram Reel script** — punchy, fast-paced, visual focus  
+2. A compelling **X (Twitter) post or short thread** — punchy, informative or opinion-based  
+3. A 1-minute **YouTube Short script** — structured, story or fact-style, strong hook and CTA  
 
-Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner creator friendly.
+Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner-creator-friendly.
 """
 
     print("🔁 Sending to Groq with prompt:")
@@ -55,8 +54,7 @@ Make each one stand on its own. Don't repeat the same script for all 3. Make it 
 
         data = response.json()
         reply_text = data["choices"][0]["message"]["content"]
-
-        print("📝 Final reply:", reply_text[:300], "..." if len(reply_text) > 300 else "")
+        print("📝 Final reply (start):", reply_text[:300])
         return reply_text
 
     except Exception as e:
@@ -71,14 +69,23 @@ def whatsapp():
 
     reply = generate_script(incoming_msg)
 
-    # Safety: fallback message if empty
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # WhatsApp safety: trim long messages
-    max_twilio_length = 1600
+    # ✅ Sanitize the response for WhatsApp
+    reply = reply.replace("**", "")
+    reply = reply.replace("*", "")
+    reply = reply.replace("```", "")
+    reply = reply.replace("__", "")
+    reply = reply.encode("ascii", "ignore").decode()  # Remove emojis & special characters
+
+    # ✅ Trim line count
+    reply = "\n".join(reply.splitlines()[:20])
+
+    # ✅ Enforce Twilio message size limit
+    max_twilio_length = 1500
     if len(reply) > max_twilio_length:
-        print(f"✂️ Reply too long ({len(reply)} chars), trimming to {max_twilio_length}")
+        print(f"✂️ Reply too long ({len(reply)} chars), trimming")
         reply = reply[:max_twilio_length] + "\n\n[Trimmed for WhatsApp]"
 
     resp = MessagingResponse()
