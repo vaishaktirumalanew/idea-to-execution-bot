@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
+import os  # ✅ this was missing!
 
 app = Flask(__name__)
 
