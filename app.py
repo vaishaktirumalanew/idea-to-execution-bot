@@ -34,12 +34,6 @@ Based on this, generate the following:
    - Clear, insightful, opinion-based or informational
    - Avoid fluff — be direct and helpful
 
-3. A **1-minute YouTube Short script** with:
-   - A quick attention-grabber
-   - The core message/story
-   - A soft ending with CTA or reflection
-   - Again, no timestamps — just write like you're scripting for a creator
-
 Be crisp. Emphasize the content of the topic. Avoid repeating the same idea across formats. Write as if it's ready to be filmed.
 """
 
@@ -84,29 +78,25 @@ def whatsapp():
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # Clean up markdown and non-ASCII characters
+    # Clean formatting for WhatsApp
     reply = reply.replace("**", "").replace("*", "")
     reply = reply.replace("```", "").replace("__", "")
     reply = reply.encode("ascii", "ignore").decode()
 
-    # Split reply into separate sections
+    # Split reply into sections
     sections = reply.split("### ")
-    insta, x_post, yt = "", "", ""
+    insta, x_post = "", ""
     for section in sections:
         if "Instagram" in section:
             insta = section.strip()
         elif "Twitter" in section or "X" in section:
             x_post = section.strip()
-        elif "YouTube" in section:
-            yt = section.strip()
 
     resp = MessagingResponse()
     if insta:
         resp.message("📸 *Instagram Reel Script:*\n\n" + insta[:1500])
     if x_post:
         resp.message("🐦 *X / Twitter Thread:*\n\n" + x_post[:1500])
-    if yt:
-        resp.message("📺 *YouTube Short Script:*\n\n" + yt[:1500])
 
     print("📤 Reply sections sent.")
     return Response(str(resp), mimetype="application/xml")
