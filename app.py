@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Generate platform-specific content using Groq
+# Function to generate content using Groq API
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
@@ -31,9 +31,11 @@ Based on this, generate:
 
 Make each one stand on its own. Don't repeat the same script for all 3. Make it WhatsApp-friendly and beginner creator friendly.
 """
+
     print("🔁 Sending to Groq with prompt:")
     print(prompt)
     print("📬 Waiting for response...")
+
     try:
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -48,8 +50,14 @@ Make each one stand on its own. Don't repeat the same script for all 3. Make it 
             }
         )
 
+        print("✅ Groq status code:", response.status_code)
+        print("🧠 Raw response text:", response.text)
+
         data = response.json()
-        return data["choices"][0]["message"]["content"]
+
+        reply_text = data["choices"][0]["message"]["content"]
+        print("📝 Final reply:", reply_text)
+        return reply_text
 
     except Exception as e:
         print("❌ Error from Groq:", str(e), flush=True)
