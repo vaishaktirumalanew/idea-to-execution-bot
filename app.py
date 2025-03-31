@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
@@ -81,7 +80,7 @@ def whatsapp():
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # Sanitize markdown and special characters
+    # Clean markdown + encoding
     reply = reply.replace("**", "").replace("*", "")
     reply = reply.replace("```", "").replace("__", "")
     reply = reply.encode("ascii", "ignore").decode()
@@ -95,21 +94,32 @@ def whatsapp():
         elif "Twitter" in section or "X" in section:
             x_post = section.strip()
 
-    # Trim if too long
-    max_len = 1500
-    if len(insta) > max_len:
-        insta = insta[:max_len] + "\n\n[Trimmed for WhatsApp]"
-    if len(x_post) > max_len:
-        x_post = x_post[:max_len] + "\n\n[Trimmed for WhatsApp]"
+    # Split safely
+    def split_message(text, max_length=1500):
+        lines = text.split("\n")
+        chunks = []
+        chunk = ""
 
-    # Send messages
+        for line in lines:
+            if len(chunk) + len(line) + 1 > max_length:
+                chunks.append(chunk.strip())
+                chunk = line
+            else:
+                chunk += "\n" + line if chunk else line
+        if chunk:
+            chunks.append(chunk.strip())
+        return chunks
+
+    # Build Twilio reply
     resp = MessagingResponse()
     if insta:
-        resp.message("📸 *Instagram Reel Script:*\n\n" + insta)
+        for i, part in enumerate(split_message(insta)):
+            resp.message(f"📸 *Instagram Reel (Part {i+1}):*\n\n{part}")
     if x_post:
-        resp.message("🐦 *X / Twitter Thread:*\n\n" + x_post)
+        for i, part in enumerate(split_message(x_post)):
+            resp.message(f"🐦 *X Thread (Part {i+1}):*\n\n{part}")
 
-    print("📤 Reply sections sent.")
+    print("📤 WhatsApp message(s) sent.")
     return Response(str(resp), mimetype="application/xml")
 
 
