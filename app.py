@@ -32,9 +32,9 @@ Now, create two platform-specific scripts — but keep the following in mind:
 
 Generate:
 
-1. A **1-minute Instagram Reel script** — attention-grabbing, opinionated, and tight. No fluff. Write as a single content block with a bold start and a clear conclusion.
+1. A **1-minute Instagram Reel script** — attention-grabbing, opinionated, and tight. No fluff. Write as a single content block with a bold start and a clear conclusion. Limit to 150 words.
 
-2. A **short Twitter (X) thread (max 3 posts)** — sharp, technical, and thought-provoking. Don’t repeat Reel content. Use it to offer a different angle or counterpoint.
+2. A **short Twitter (X) thread (max 3 posts)** — sharp, technical, and thought-provoking. Don’t repeat Reel content. Use it to offer a different angle or counterpoint. Limit each post to 280 characters.
 
 Write for creators who are building a niche by showing original thinking, not chasing trends.
 """
@@ -114,10 +114,15 @@ def whatsapp():
     resp = MessagingResponse()
     if insta:
         for i, part in enumerate(split_message(insta)):
+            print(f"📤 Sending Insta part {i+1}: {len(part)} chars")
             resp.message(f"📸 *Instagram Reel (Part {i+1}):*\n\n{part}")
     if x_post:
         for i, part in enumerate(split_message(x_post)):
+            print(f"📤 Sending X part {i+1}: {len(part)} chars")
             resp.message(f"🐦 *X Thread (Part {i+1}):*\n\n{part}")
+
+    if not insta and not x_post:
+        resp.message("⚠️ Unable to generate or deliver script. Try again with a simpler topic.")
 
     print("📤 WhatsApp message(s) sent.")
     return Response(str(resp), mimetype="application/xml")
@@ -125,3 +130,4 @@ def whatsapp():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
