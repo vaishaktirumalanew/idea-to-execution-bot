@@ -10,19 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-response = requests.post(
-    "https://api.groq.com/openai/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    },
-    json={
-        "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.8
-    },
-    timeout=6  # ⏱ TIMEOUT in seconds
-)
+
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
@@ -66,7 +54,8 @@ Write for creators who are building a niche by showing original thinking, not ch
                 "model": "llama-3.3-70b-versatile",
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.8
-            }
+            },
+            timeout=6
         )
 
         print("✅ Groq status code:", response.status_code)
@@ -74,6 +63,7 @@ Write for creators who are building a niche by showing original thinking, not ch
 
         data = response.json()
         reply_text = data["choices"][0]["message"]["content"]
+        reply_text = reply_text[:1500]  # limit to prevent WhatsApp cutoff
         print("📝 Final reply (start):", reply_text[:300])
         return reply_text
 
@@ -92,12 +82,10 @@ def whatsapp():
     if not reply or len(reply.strip()) == 0:
         reply = "⚠️ I couldn’t generate a response. Try again in a few seconds."
 
-    # Clean markdown + encoding
     reply = reply.replace("**", "").replace("*", "")
     reply = reply.replace("```", "").replace("__", "")
     reply = reply.encode("ascii", "ignore").decode()
 
-    # Extract sections
     sections = reply.split("### ")
     insta, x_post = "", ""
     for section in sections:
@@ -106,7 +94,6 @@ def whatsapp():
         elif "Twitter" in section or "X" in section:
             x_post = section.strip()
 
-    # Split safely
     def split_message(text, max_length=1500):
         lines = text.split("\n")
         chunks = []
@@ -122,7 +109,6 @@ def whatsapp():
             chunks.append(chunk.strip())
         return chunks
 
-    # Build Twilio reply
     resp = MessagingResponse()
     if insta:
         for i, part in enumerate(split_message(insta)):
