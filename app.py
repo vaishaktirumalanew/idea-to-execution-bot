@@ -10,7 +10,19 @@ load_dotenv()
 app = Flask(__name__)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-
+response = requests.post(
+    "https://api.groq.com/openai/v1/chat/completions",
+    headers={
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.8
+    },
+    timeout=6  # ⏱ TIMEOUT in seconds
+)
 def generate_script(user_idea):
     context = gather_context(user_idea)
 
